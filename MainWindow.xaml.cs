@@ -10,11 +10,11 @@ namespace MapVisualization
 {
     public partial class MainWindow : Window
     {
-        private List<City> cities;
-        private double canvasCenterX;
-        private double canvasCenterY;
         private const double centerLatitude = 42.7;
         private const double centerLongitude = 23.32;
+        private double canvasCenterX;
+        private double canvasCenterY;
+        private List<City> cities;
 
         public MainWindow()
         {
@@ -31,12 +31,6 @@ namespace MapVisualization
             DrawMap();
         }
 
-        public class DijkstraData
-        {
-            public City Previous { get; set; }
-            public double Distance { get; set; }
-        }
-
 
         private List<City> FindRoute(City start, City end)
         {
@@ -47,19 +41,17 @@ namespace MapVisualization
             while (notVisited.Count != 0)
             {
                 City toOpen = null;
-                double bestPrice = double.PositiveInfinity;
+                var bestPrice = double.PositiveInfinity;
 
                 foreach (var city in notVisited)
-                {
                     if (track.ContainsKey(city) && track[city].Distance < bestPrice)
                     {
                         toOpen = city;
                         bestPrice = track[city].Distance;
                     }
-                }
 
-                if (toOpen == null) return new List<City>(); 
-                if (toOpen == end) break; 
+                if (toOpen == null) return new List<City>();
+                if (toOpen == end) break;
 
                 foreach (var road in toOpen.Roads)
                 {
@@ -67,9 +59,7 @@ namespace MapVisualization
                     var nextCity = road.Destination;
 
                     if (!track.ContainsKey(nextCity) || track[nextCity].Distance > currentPrice)
-                    {
                         track[nextCity] = new DijkstraData { Distance = currentPrice, Previous = toOpen };
-                    }
                 }
 
                 notVisited.Remove(toOpen);
@@ -91,13 +81,13 @@ namespace MapVisualization
         {
             if (route.Count < 2) return;
 
-            double totalDistance = 0.0;
-            for (int i = 0; i < route.Count - 1; i++)
+            var totalDistance = 0.0;
+            for (var i = 0; i < route.Count - 1; i++)
             {
                 var fromCity = route[i];
                 var toCity = route[i + 1];
 
-                double distance = Math.Sqrt(Math.Pow(fromCity.X - toCity.X, 2) + Math.Pow(fromCity.Y - toCity.Y, 2));
+                var distance = Math.Sqrt(Math.Pow(fromCity.X - toCity.X, 2) + Math.Pow(fromCity.Y - toCity.Y, 2));
                 totalDistance += distance;
             }
 
@@ -108,38 +98,28 @@ namespace MapVisualization
         {
             if (route.Count < 2) return;
 
-            for (int i = 0; i < route.Count - 1; i++)
+            for (var i = 0; i < route.Count - 1; i++)
             {
                 var fromCity = route[i];
                 var toCity = route[i + 1];
 
                 foreach (var child in MapCanvas.Children)
-                {
                     if (child is Line line)
-                    {
                         if ((line.X1 == fromCity.X && line.Y1 == fromCity.Y &&
                              line.X2 == toCity.X && line.Y2 == toCity.Y) ||
                             (line.X2 == fromCity.X && line.Y2 == fromCity.Y &&
                              line.X1 == toCity.X && line.Y1 == toCity.Y))
-                        {
                             line.Stroke = Brushes.Red;
-                        }
-                    }
-                }
             }
         }
 
         private void FindRouteButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (var child in MapCanvas.Children)
-            {
                 if (child is Line line)
-                {
-                    line.Stroke = Brushes.Gray; 
-                }
-            }
-            string startCityName = StartCityComboBox.SelectedItem as string;
-            string endCityName = EndCityComboBox.SelectedItem as string;
+                    line.Stroke = Brushes.Gray;
+            var startCityName = StartCityComboBox.SelectedItem as string;
+            var endCityName = EndCityComboBox.SelectedItem as string;
 
             if (startCityName == null || endCityName == null) return;
 
@@ -160,24 +140,25 @@ namespace MapVisualization
                 Console.WriteLine("Route not found");
             }
         }
+
         private void InitializeCities(double scaleFactor)
         {
             cities = new List<City>();
 
             var citiesCoordinates = new Dictionary<string, (double, double)>
             {
-                { "Varna", (43.2167, 27.9167) },         // Варна
-                { "Burgas", (42.5083, 27.4678) },        // Бургас
-                { "Dobrich", (43.5667, 27.8333) },       // Добрич
-                { "Silistra", (44.1167, 27.2667) },      // Силистра
-                { "Razgrad", (43.5333, 26.5167) },       // Разград
-                { "Tyrgowishte", (43.2506, 26.5725) },   // Тырговиште
-                { "Shumen", (43.2833, 26.9333) },        // Шумен
-                { "Veliko Tarnovo", (43.083, 25.65) },   // Велико-Тырново
-                { "Sliven", (42.6833, 26.3333) },        // Сливен
-                { "Yambol", (42.4837, 26.5107) },        // Ямбол
-                { "Kazanlak", (42.617, 25.4) },          // Казанлык
-                { "Stara Zagora", (42.433, 25.65) }      // Стара-Загора
+                { "Varna", (43.2167, 27.9167) }, // Варна
+                { "Burgas", (42.5083, 27.4678) }, // Бургас
+                { "Dobrich", (43.5667, 27.8333) }, // Добрич
+                { "Silistra", (44.1167, 27.2667) }, // Силистра
+                { "Razgrad", (43.5333, 26.5167) }, // Разград
+                { "Tyrgowishte", (43.2506, 26.5725) }, // Тырговиште
+                { "Shumen", (43.2833, 26.9333) }, // Шумен
+                { "Veliko Tarnovo", (43.083, 25.65) }, // Велико-Тырново
+                { "Sliven", (42.6833, 26.3333) }, // Сливен
+                { "Yambol", (42.4837, 26.5107) }, // Ямбол
+                { "Kazanlak", (42.617, 25.4) }, // Казанлык
+                { "Stara Zagora", (42.433, 25.65) } // Стара-Загора
             };
 
             foreach (var cityData in citiesCoordinates)
@@ -190,92 +171,91 @@ namespace MapVisualization
                 var city = new City(cityName, canvasCoordinates.X, canvasCoordinates.Y);
                 cities.Add(city);
             }
+
             var roadsData = new List<RoadData>
             {
-                new RoadData { Origin = "Varna", Destination = "Burgas", Distance = 87, MaxSpeed = 100 },
-                new RoadData { Origin = "Burgas", Destination = "Varna", Distance = 87, MaxSpeed = 100 },
+                new() { Origin = "Varna", Destination = "Burgas", Distance = 87, MaxSpeed = 100 },
+                new() { Origin = "Burgas", Destination = "Varna", Distance = 87, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Dobrich", Destination = "Varna", Distance = 40, MaxSpeed = 100 },
-                new RoadData { Origin = "Varna", Destination = "Dobrich", Distance = 40, MaxSpeed = 100 },
+                new() { Origin = "Dobrich", Destination = "Varna", Distance = 40, MaxSpeed = 100 },
+                new() { Origin = "Varna", Destination = "Dobrich", Distance = 40, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Varna", Destination = "Razgrad", Distance = 130, MaxSpeed = 100 },
-                new RoadData { Origin = "Razgrad", Destination = "Varna", Distance = 130, MaxSpeed = 100 },
+                new() { Origin = "Varna", Destination = "Razgrad", Distance = 130, MaxSpeed = 100 },
+                new() { Origin = "Razgrad", Destination = "Varna", Distance = 130, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Razgrad", Destination = "Silistra", Distance = 120, MaxSpeed = 100 },
-                new RoadData { Origin = "Silistra", Destination = "Razgrad", Distance = 120, MaxSpeed = 100 },
+                new() { Origin = "Razgrad", Destination = "Silistra", Distance = 120, MaxSpeed = 100 },
+                new() { Origin = "Silistra", Destination = "Razgrad", Distance = 120, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Dobrich", Destination = "Silistra", Distance = 76, MaxSpeed = 100 },
-                new RoadData { Origin = "Silistra", Destination = "Dobrich", Distance = 76, MaxSpeed = 100 },
+                new() { Origin = "Dobrich", Destination = "Silistra", Distance = 76, MaxSpeed = 100 },
+                new() { Origin = "Silistra", Destination = "Dobrich", Distance = 76, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Dobrich", Destination = "Razgrad", Distance = 168, MaxSpeed = 100 },
-                new RoadData { Origin = "Razgrad", Destination = "Dobrich", Distance = 168, MaxSpeed = 100 },
+                new() { Origin = "Dobrich", Destination = "Razgrad", Distance = 168, MaxSpeed = 100 },
+                new() { Origin = "Razgrad", Destination = "Dobrich", Distance = 168, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Shumen", Destination = "Razgrad", Distance = 50, MaxSpeed = 100 },
-                new RoadData { Origin = "Razgrad", Destination = "Shumen", Distance = 50, MaxSpeed = 100 },
+                new() { Origin = "Shumen", Destination = "Razgrad", Distance = 50, MaxSpeed = 100 },
+                new() { Origin = "Razgrad", Destination = "Shumen", Distance = 50, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Shumen", Destination = "Tyrgowishte", Distance = 41, MaxSpeed = 100 },
-                new RoadData { Origin = "Tyrgowishte", Destination = "Shumen", Distance = 41, MaxSpeed = 100 },
+                new() { Origin = "Shumen", Destination = "Tyrgowishte", Distance = 41, MaxSpeed = 100 },
+                new() { Origin = "Tyrgowishte", Destination = "Shumen", Distance = 41, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Shumen", Destination = "Burgas", Distance = 96, MaxSpeed = 100 },
-                new RoadData { Origin = "Burgas", Destination = "Shumen", Distance = 96, MaxSpeed = 100 },
+                new() { Origin = "Shumen", Destination = "Burgas", Distance = 96, MaxSpeed = 100 },
+                new() { Origin = "Burgas", Destination = "Shumen", Distance = 96, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Tyrgowishte", Destination = "Razgrad", Distance = 32, MaxSpeed = 100 },
-                new RoadData { Origin = "Razgrad", Destination = "Tyrgowishte", Distance = 32, MaxSpeed = 100 },
+                new() { Origin = "Tyrgowishte", Destination = "Razgrad", Distance = 32, MaxSpeed = 100 },
+                new() { Origin = "Razgrad", Destination = "Tyrgowishte", Distance = 32, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Shumen", Destination = "Varna", Distance = 90, MaxSpeed = 100 },
-                new RoadData { Origin = "Varna", Destination = "Shumen", Distance = 90, MaxSpeed = 100 },
+                new() { Origin = "Shumen", Destination = "Varna", Distance = 90, MaxSpeed = 100 },
+                new() { Origin = "Varna", Destination = "Shumen", Distance = 90, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Shumen", Destination = "Dobrich", Distance = 95, MaxSpeed = 100 },
-                new RoadData { Origin = "Dobrich", Destination = "Shumen", Distance = 95, MaxSpeed = 100 },
+                new() { Origin = "Shumen", Destination = "Dobrich", Distance = 95, MaxSpeed = 100 },
+                new() { Origin = "Dobrich", Destination = "Shumen", Distance = 95, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Shumen", Destination = "Sliven", Distance = 82, MaxSpeed = 100 },
-                new RoadData { Origin = "Sliven", Destination = "Shumen", Distance = 82, MaxSpeed = 100 },
+                new() { Origin = "Shumen", Destination = "Sliven", Distance = 82, MaxSpeed = 100 },
+                new() { Origin = "Sliven", Destination = "Shumen", Distance = 82, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Burgas", Destination = "Sliven", Distance = 115, MaxSpeed = 100 },
-                new RoadData { Origin = "Sliven", Destination = "Burgas", Distance = 115, MaxSpeed = 100 },
+                new() { Origin = "Burgas", Destination = "Sliven", Distance = 115, MaxSpeed = 100 },
+                new() { Origin = "Sliven", Destination = "Burgas", Distance = 115, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Yambol", Destination = "Sliven", Distance = 28, MaxSpeed = 100 },
-                new RoadData { Origin = "Sliven", Destination = "Yambol", Distance = 28, MaxSpeed = 100 },
+                new() { Origin = "Yambol", Destination = "Sliven", Distance = 28, MaxSpeed = 100 },
+                new() { Origin = "Sliven", Destination = "Yambol", Distance = 28, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Yambol", Destination = "Burgas", Distance = 79, MaxSpeed = 100 },
-                new RoadData { Origin = "Burgas", Destination = "Yambol", Distance = 79, MaxSpeed = 100 },
+                new() { Origin = "Yambol", Destination = "Burgas", Distance = 79, MaxSpeed = 100 },
+                new() { Origin = "Burgas", Destination = "Yambol", Distance = 79, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Veliko Tarnovo", Destination = "Razgrad", Distance = 79, MaxSpeed = 100 },
-                new RoadData { Origin = "Razgrad", Destination = "Veliko Tarnovo", Distance = 79, MaxSpeed = 100 },
+                new() { Origin = "Veliko Tarnovo", Destination = "Razgrad", Distance = 79, MaxSpeed = 100 },
+                new() { Origin = "Razgrad", Destination = "Veliko Tarnovo", Distance = 79, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Veliko Tarnovo", Destination = "Sliven", Distance = 79, MaxSpeed = 100 },
-                new RoadData { Origin = "Sliven", Destination = "Veliko Tarnovo", Distance = 79, MaxSpeed = 100 },
+                new() { Origin = "Veliko Tarnovo", Destination = "Sliven", Distance = 79, MaxSpeed = 100 },
+                new() { Origin = "Sliven", Destination = "Veliko Tarnovo", Distance = 79, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Tyrgowishte", Destination = "Sliven", Distance = 112, MaxSpeed = 100 },
-                new RoadData { Origin = "Sliven", Destination = "Tyrgowishte", Distance = 112, MaxSpeed = 100 },
+                new() { Origin = "Tyrgowishte", Destination = "Sliven", Distance = 112, MaxSpeed = 100 },
+                new() { Origin = "Sliven", Destination = "Tyrgowishte", Distance = 112, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Veliko Tarnovo", Destination = "Tyrgowishte", Distance = 112, MaxSpeed = 100 },
-                new RoadData { Origin = "Tyrgowishte", Destination = "Veliko Tarnovo", Distance = 112, MaxSpeed = 100 },
+                new() { Origin = "Veliko Tarnovo", Destination = "Tyrgowishte", Distance = 112, MaxSpeed = 100 },
+                new() { Origin = "Tyrgowishte", Destination = "Veliko Tarnovo", Distance = 112, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Stara Zagora", Destination = "Sliven", Distance = 63, MaxSpeed = 100 },
-                new RoadData { Origin = "Sliven", Destination = "Stara Zagora", Distance = 63, MaxSpeed = 100 },
+                new() { Origin = "Stara Zagora", Destination = "Sliven", Distance = 63, MaxSpeed = 100 },
+                new() { Origin = "Sliven", Destination = "Stara Zagora", Distance = 63, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Stara Zagora", Destination = "Yambol", Distance = 63, MaxSpeed = 100 },
-                new RoadData { Origin = "Yambol", Destination = "Stara Zagora", Distance = 63, MaxSpeed = 100 },
+                new() { Origin = "Stara Zagora", Destination = "Yambol", Distance = 63, MaxSpeed = 100 },
+                new() { Origin = "Yambol", Destination = "Stara Zagora", Distance = 63, MaxSpeed = 100 },
 
 
-                new RoadData { Origin = "Stara Zagora", Destination = "Kazanlak", Distance = 33, MaxSpeed = 100 },
-                new RoadData { Origin = "Kazanlak", Destination = "Stara Zagora", Distance = 33, MaxSpeed = 100 },
+                new() { Origin = "Stara Zagora", Destination = "Kazanlak", Distance = 33, MaxSpeed = 100 },
+                new() { Origin = "Kazanlak", Destination = "Stara Zagora", Distance = 33, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Veliko Tarnovo", Destination = "Kazanlak", Distance = 33, MaxSpeed = 100 },
-                new RoadData { Origin = "Kazanlak", Destination = "Veliko Tarnovo", Distance = 33, MaxSpeed = 100 },
+                new() { Origin = "Veliko Tarnovo", Destination = "Kazanlak", Distance = 33, MaxSpeed = 100 },
+                new() { Origin = "Kazanlak", Destination = "Veliko Tarnovo", Distance = 33, MaxSpeed = 100 },
 
-                new RoadData { Origin = "Sliven", Destination = "Kazanlak", Distance = 84, MaxSpeed = 100 },
-                new RoadData { Origin = "Kazanlak", Destination = "Sliven", Distance = 84, MaxSpeed = 100 },
-
+                new() { Origin = "Sliven", Destination = "Kazanlak", Distance = 84, MaxSpeed = 100 },
+                new() { Origin = "Kazanlak", Destination = "Sliven", Distance = 84, MaxSpeed = 100 }
             };
 
             foreach (var city in cities)
             {
                 StartCityComboBox.Items.Add(city.Name);
                 EndCityComboBox.Items.Add(city.Name);
-                foreach (var roadInfo in roadsData) 
-                {
+                foreach (var roadInfo in roadsData)
                     if (roadInfo.Origin == city.Name)
                     {
                         var destinationCity = cities.Find(c => c.Name == roadInfo.Destination);
@@ -290,17 +270,16 @@ namespace MapVisualization
                             city.Roads.Add(road);
                         }
                     }
-                }
             }
         }
 
         private Point ConvertToCanvasCoordinates(double latitude, double longitude, double scaleFactor)
         {
-            double relativeX = longitude - centerLongitude;
-            double relativeY = centerLatitude - latitude;
+            var relativeX = longitude - centerLongitude;
+            var relativeY = centerLatitude - latitude;
 
-            double canvasX = canvasCenterX + relativeX * scaleFactor;
-            double canvasY = canvasCenterY + relativeY * scaleFactor;
+            var canvasX = canvasCenterX + relativeX * scaleFactor;
+            var canvasY = canvasCenterY + relativeY * scaleFactor;
 
             return new Point(canvasX, canvasY);
         }
@@ -309,13 +288,11 @@ namespace MapVisualization
         {
             foreach (var city in cities)
             {
-                foreach (var road in city.Roads)
-                {
-                    DrawRoad(city, road.Destination);
-                }
+                foreach (var road in city.Roads) DrawRoad(city, road.Destination);
                 DrawCity(city);
             }
         }
+
         private void DrawRoad(City from, City to)
         {
             var roadLine = new Line
@@ -329,6 +306,7 @@ namespace MapVisualization
             };
             MapCanvas.Children.Add(roadLine);
         }
+
         private void DrawCity(City city)
         {
             const double cityDiameter = 10;
@@ -351,7 +329,8 @@ namespace MapVisualization
             const double fontSize = 12;
             const double textOffsetX = 5; // Смещение текста по X
             const double textOffsetY = -5; // Смещение текста по Y
-            var typeface = new Typeface(new FontFamily("Arial"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal);
+            var typeface = new Typeface(new FontFamily("Arial"), FontStyles.Normal, FontWeights.Bold,
+                FontStretches.Normal);
             var formattedText = new FormattedText(
                 city.Name,
                 CultureInfo.CurrentCulture,
@@ -368,7 +347,8 @@ namespace MapVisualization
             {
                 // Отрисовка контура текста
                 var pen = new Pen(Brushes.White, 2);
-                drawingContext.DrawGeometry(null, pen, formattedText.BuildGeometry(new Point(city.X + textOffsetX, city.Y + textOffsetY)));
+                drawingContext.DrawGeometry(null, pen,
+                    formattedText.BuildGeometry(new Point(city.X + textOffsetX, city.Y + textOffsetY)));
 
                 // Отрисовка самого текста
                 drawingContext.DrawText(formattedText, new Point(city.X + textOffsetX, city.Y + textOffsetY));
@@ -376,6 +356,12 @@ namespace MapVisualization
 
             var drawingHost = new VisualHost { Visual = textVisual };
             MapCanvas.Children.Add(drawingHost);
+        }
+
+        public class DijkstraData
+        {
+            public City Previous { get; set; }
+            public double Distance { get; set; }
         }
 
         // Класс VisualHost для отображения DrawingVisual на Canvas
@@ -391,16 +377,10 @@ namespace MapVisualization
                 return Visual;
             }
         }
-
     }
 
     public class City
     {
-        public string Name { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
-        public List<Road> Roads { get; set; }
-
         public City(string name, double x, double y)
         {
             Name = name;
@@ -408,6 +388,11 @@ namespace MapVisualization
             Y = y;
             Roads = new List<Road>();
         }
+
+        public string Name { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public List<Road> Roads { get; set; }
     }
 
     public class Road
@@ -417,6 +402,7 @@ namespace MapVisualization
         public double MaxSpeed { get; set; } // Максимальная скорость в км/ч
     }
 }
+
 public class RoadData
 {
     public string Origin { get; set; }
