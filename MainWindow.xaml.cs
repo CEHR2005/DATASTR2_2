@@ -10,8 +10,8 @@ namespace MapVisualization
 {
     public partial class MainWindow : Window
     {
-        private const double centerLatitude = 42.7;
-        private const double centerLongitude = 23.32;
+        private const double centerLatitude = 43.3;
+        private const double centerLongitude = 24.3;
         private double canvasCenterX;
         private double canvasCenterY;
         private List<City> cities;
@@ -26,7 +26,7 @@ namespace MapVisualization
         {
             canvasCenterX = 0;
             canvasCenterY = MapCanvas.ActualHeight / 2;
-            double scaleFactor = 120;
+            double scaleFactor = 160;
             InitializeCities(scaleFactor);
             DrawMap();
         }
@@ -77,22 +77,34 @@ namespace MapVisualization
             return path;
         }
 
-        private void DisplayDistance(List<City> route)
+        private void DisplayDistanceAndTime(List<City> route)
         {
             if (route.Count < 2) return;
 
             var totalDistance = 0.0;
+            var totalTime = 0.0; 
+
             for (var i = 0; i < route.Count - 1; i++)
             {
                 var fromCity = route[i];
                 var toCity = route[i + 1];
 
+                var road = fromCity.Roads.Find(r => r.Destination == toCity);
+                if (road == null) continue;
+
                 var distance = Math.Sqrt(Math.Pow(fromCity.X - toCity.X, 2) + Math.Pow(fromCity.Y - toCity.Y, 2));
                 totalDistance += distance;
+
+                var time = distance / road.MaxSpeed; 
+                totalTime += time;
             }
 
-            DistanceTextBlock.Text = $"Расстояние: {totalDistance:F2} единиц";
+            var hours = (int)totalTime;
+            var minutes = (int)((totalTime - hours) * 60);
+
+            DistanceTextBlock.Text = $"Distance: {totalDistance:F2} km, Time: {hours} H {minutes} M";
         }
+
 
         private void HighlightRoute(List<City> route)
         {
@@ -133,7 +145,7 @@ namespace MapVisualization
             if (route.Count > 0)
             {
                 HighlightRoute(route);
-                DisplayDistance(route);
+                DisplayDistanceAndTime(route);
             }
             else
             {
@@ -147,18 +159,18 @@ namespace MapVisualization
 
             var citiesCoordinates = new Dictionary<string, (double, double)>
             {
-                { "Varna", (43.2167, 27.9167) }, // Варна
-                { "Burgas", (42.5083, 27.4678) }, // Бургас
-                { "Dobrich", (43.5667, 27.8333) }, // Добрич
-                { "Silistra", (44.1167, 27.2667) }, // Силистра
-                { "Razgrad", (43.5333, 26.5167) }, // Разград
-                { "Tyrgowishte", (43.2506, 26.5725) }, // Тырговиште
-                { "Shumen", (43.2833, 26.9333) }, // Шумен
-                { "Veliko Tarnovo", (43.083, 25.65) }, // Велико-Тырново
-                { "Sliven", (42.6833, 26.3333) }, // Сливен
-                { "Yambol", (42.4837, 26.5107) }, // Ямбол
-                { "Kazanlak", (42.617, 25.4) }, // Казанлык
-                { "Stara Zagora", (42.433, 25.65) } // Стара-Загора
+                { "Varna", (43.2167, 27.9167) }, 
+                { "Burgas", (42.5083, 27.4678) }, 
+                { "Dobrich", (43.5667, 27.8333) }, 
+                { "Silistra", (44.1167, 27.2667) }, 
+                { "Razgrad", (43.5333, 26.5167) }, 
+                { "Tyrgowishte", (43.2506, 26.5725) }, 
+                { "Shumen", (43.2833, 26.9333) }, 
+                { "Veliko Tarnovo", (43.083, 25.65) }, 
+                { "Sliven", (42.6833, 26.3333) },
+                { "Yambol", (42.4837, 26.5107) }, 
+                { "Kazanlak", (42.617, 25.4) }, 
+                { "Stara Zagora", (42.433, 25.65) } 
             };
 
             foreach (var cityData in citiesCoordinates)
@@ -289,6 +301,9 @@ namespace MapVisualization
             foreach (var city in cities)
             {
                 foreach (var road in city.Roads) DrawRoad(city, road.Destination);
+            }
+            foreach (var city in cities)
+            {
                 DrawCity(city);
             }
         }
@@ -326,9 +341,9 @@ namespace MapVisualization
 
         private void DrawCityName(City city)
         {
-            const double fontSize = 12;
-            const double textOffsetX = 5; // Смещение текста по X
-            const double textOffsetY = -5; // Смещение текста по Y
+            const double fontSize = 9;
+            const double textOffsetX = 5; 
+            const double textOffsetY = -5;
             var typeface = new Typeface(new FontFamily("Arial"), FontStyles.Normal, FontWeights.Bold,
                 FontStretches.Normal);
             var formattedText = new FormattedText(
@@ -345,12 +360,10 @@ namespace MapVisualization
             var textVisual = new DrawingVisual();
             using (var drawingContext = textVisual.RenderOpen())
             {
-                // Отрисовка контура текста
                 var pen = new Pen(Brushes.White, 2);
                 drawingContext.DrawGeometry(null, pen,
                     formattedText.BuildGeometry(new Point(city.X + textOffsetX, city.Y + textOffsetY)));
 
-                // Отрисовка самого текста
                 drawingContext.DrawText(formattedText, new Point(city.X + textOffsetX, city.Y + textOffsetY));
             }
 
@@ -364,7 +377,6 @@ namespace MapVisualization
             public double Distance { get; set; }
         }
 
-        // Класс VisualHost для отображения DrawingVisual на Canvas
         public class VisualHost : FrameworkElement
         {
             public DrawingVisual Visual { get; set; }
@@ -398,8 +410,8 @@ namespace MapVisualization
     public class Road
     {
         public City Destination { get; set; }
-        public double Distance { get; set; } // Расстояние в километрах
-        public double MaxSpeed { get; set; } // Максимальная скорость в км/ч
+        public double Distance { get; set; } 
+        public double MaxSpeed { get; set; } 
     }
 }
 
@@ -407,6 +419,6 @@ public class RoadData
 {
     public string Origin { get; set; }
     public string Destination { get; set; }
-    public double Distance { get; set; } // Расстояние в километрах
-    public double MaxSpeed { get; set; } // Максимальная скорость в км/ч
+    public double Distance { get; set; } 
+    public double MaxSpeed { get; set; } 
 }
